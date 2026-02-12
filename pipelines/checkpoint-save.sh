@@ -14,10 +14,21 @@ CHECKPOINTS_DIR="${MEMORY_HOME}/checkpoints"
 SESSION_ID="$1"
 SOURCE_FILE="$2"
 
+validate_session_id() {
+    local val="$1"
+    if [[ ! "$val" =~ ^[a-zA-Z0-9][a-zA-Z0-9_.-]*$ ]]; then
+        echo "Error: session-id must match ^[a-zA-Z0-9][a-zA-Z0-9_.-]*$" >&2
+        echo "Got: $val" >&2
+        exit 1
+    fi
+}
+
 if [ -z "$SESSION_ID" ]; then
     echo "Error: session-id is required" >&2
     exit 1
 fi
+
+validate_session_id "$SESSION_ID"
 
 if [ -z "$SOURCE_FILE" ] || [ ! -f "$SOURCE_FILE" ]; then
     echo "Error: valid file path is required" >&2

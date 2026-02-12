@@ -58,7 +58,9 @@ else
     }')
 fi
 
-echo "$UPDATED_JSON" > "$STATUS_FILE"
+tmp_file="$(mktemp "${STATUS_FILE}.tmp.XXXXXX")"
+echo "$UPDATED_JSON" > "$tmp_file"
+mv "$tmp_file" "$STATUS_FILE"
 
 {
     echo "---"
