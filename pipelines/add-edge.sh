@@ -34,6 +34,19 @@ OBJECT="$5"
 SOURCE="$6"
 SOURCE_REF="${7:-}"
 
+validate_slug() {
+    local val="$1"
+    local label="$2"
+    if [[ ! "$val" =~ ^[a-z0-9][a-z0-9_-]*$ ]]; then
+        echo "ERROR: $label must match ^[a-z0-9][a-z0-9_-]*$"
+        echo "Got: $val"
+        exit 1
+    fi
+}
+
+validate_slug "$SUBJECT" "entity-slug"
+validate_slug "$OBJECT" "object-entity-slug"
+
 ENTITY_DIR="$ENTITIES_DIR/$SUBJECT"
 ITEMS_FILE="$ENTITY_DIR/items.json"
 
@@ -96,8 +109,9 @@ FACT=$(jq -n \
     }')
 
 # Append to items.json
-jq --argjson fact "$FACT" '. += [$fact]' "$ITEMS_FILE" > "${ITEMS_FILE}.tmp"
-mv "${ITEMS_FILE}.tmp" "$ITEMS_FILE"
+tmp_file="$(mktemp "${ITEMS_FILE}.tmp.XXXXXX")"
+jq --argjson fact "$FACT" '. += [$fact]' "$ITEMS_FILE" > "$tmp_file"
+mv "$tmp_file" "$ITEMS_FILE"
 
 echo "Added edge fact $FACT_ID to $SUBJECT"
 echo "  Edge: $SUBJECT --[$PREDICATE]--> $OBJECT"

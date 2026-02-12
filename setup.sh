@@ -14,6 +14,7 @@
 #   4. Prints next steps
 
 set -euo pipefail
+umask 077
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MEMORY_HOME="${1:-./memory}"
@@ -28,6 +29,7 @@ mkdir -p "$MEMORY_HOME/checkpoints"
 mkdir -p "$MEMORY_HOME/metrics"
 mkdir -p "$MEMORY_HOME/logs"
 mkdir -p "$MEMORY_HOME/pipelines"
+chmod 700 "$MEMORY_HOME" "$MEMORY_HOME/entities" "$MEMORY_HOME/checkpoints" "$MEMORY_HOME/metrics" "$MEMORY_HOME/logs" "$MEMORY_HOME/pipelines" 2>/dev/null || true
 
 # Copy templates
 if [ ! -f "$MEMORY_HOME/entities/README.md" ]; then
@@ -42,6 +44,7 @@ fi
 MEMORY_MD="$(dirname "$MEMORY_HOME")/MEMORY.md"
 if [ ! -f "$MEMORY_MD" ]; then
   cp "$SCRIPT_DIR/templates/MEMORY-template.md" "$MEMORY_MD"
+  chmod 600 "$MEMORY_MD" 2>/dev/null || true
   echo "   Created: $MEMORY_MD"
 fi
 
@@ -50,7 +53,7 @@ for script in "$SCRIPT_DIR"/pipelines/*.sh; do
   [ -f "$script" ] || continue
   dest="$MEMORY_HOME/pipelines/$(basename "$script")"
   cp "$script" "$dest"
-  chmod +x "$dest"
+  chmod 700 "$dest"
 done
 
 # Copy prompt templates
@@ -58,6 +61,7 @@ for prompt in "$SCRIPT_DIR"/prompts/*.md; do
   [ -f "$prompt" ] || continue
   dest="$MEMORY_HOME/pipelines/$(basename "$prompt")"
   cp "$prompt" "$dest"
+  chmod 600 "$dest"
 done
 
 # Create .gitkeep files for empty dirs
@@ -70,6 +74,7 @@ cat > "$MEMORY_HOME/metrics/.gitignore" << 'EOF'
 # Access metrics are runtime state, not tracked in git
 access.json
 EOF
+chmod 600 "$MEMORY_HOME/metrics/.gitignore" 2>/dev/null || true
 
 echo ""
 echo "✅ Memory system initialized!"

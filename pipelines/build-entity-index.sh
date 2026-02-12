@@ -114,12 +114,14 @@ for entity_dir in "$ENTITIES_DIR"/*/; do
   fi
 done
 
+tmp_file="$(mktemp "${INDEX_FILE}.tmp.XXXXXX")"
 if command -v jq &> /dev/null; then
-  echo "[${INDEX_ENTRIES}]" | jq 'sort_by(.slug)' > "$INDEX_FILE"
+  echo "[${INDEX_ENTRIES}]" | jq 'sort_by(.slug)' > "$tmp_file"
 else
-  echo "[${INDEX_ENTRIES}]" > "$INDEX_FILE"
+  echo "[${INDEX_ENTRIES}]" > "$tmp_file"
   echo "Warning: jq not installed, index.json not sorted" >&2
 fi
+mv "$tmp_file" "$INDEX_FILE"
 
 echo "=== Entity Index Build Complete ==="
 echo ""

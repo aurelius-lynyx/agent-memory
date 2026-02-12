@@ -39,7 +39,8 @@ log_access() {
   local now
   now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-  local tmp_file="${ACCESS_FILE}.tmp"
+  local tmp_file
+  tmp_file="$(mktemp "${ACCESS_FILE}.tmp.XXXXXX")"
 
   if [ "$access_type" = "entity" ]; then
     jq --arg key "$key" --arg ts "$now" '

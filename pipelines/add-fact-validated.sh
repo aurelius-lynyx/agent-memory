@@ -51,6 +51,17 @@ CONTENT="$3"
 SOURCE="$4"
 SOURCE_REF="${5:-}"
 
+validate_slug() {
+    local val="$1"
+    local label="$2"
+    if [[ ! "$val" =~ ^[a-z0-9][a-z0-9_-]*$ ]]; then
+        echo "REJECTED: $label must match ^[a-z0-9][a-z0-9_-]*$"
+        exit 1
+    fi
+}
+
+validate_slug "$ENTITY" "entity-slug"
+
 ENTITY_DIR="$ENTITIES_DIR/$ENTITY"
 ITEMS_FILE="$ENTITY_DIR/items.json"
 
@@ -248,10 +259,11 @@ mark_historical() {
     local items_file="$1"
     local old_fact_id="$2"
 
+    tmp_file="$(mktemp "${items_file}.tmp.XXXXXX")"
     jq --arg id "$old_fact_id" \
        '(.[] | select(.id == $id)) |= . + {status: "historical"}' \
-       "$items_file" > "${items_file}.tmp"
-    mv "${items_file}.tmp" "$items_file"
+       "$items_file" > "$tmp_file"
+    mv "$tmp_file" "$items_file"
 }
 
 set_supersedes() {
@@ -259,10 +271,11 @@ set_supersedes() {
     local new_fact_id="$2"
     local old_fact_id="$3"
 
+    tmp_file="$(mktemp "${items_file}.tmp.XXXXXX")"
     jq --arg new_id "$new_fact_id" --arg old_id "$old_fact_id" \
        '(.[] | select(.id == $new_id)) |= . + {supersedes: $old_id}' \
-       "$items_file" > "${items_file}.tmp"
-    mv "${items_file}.tmp" "$items_file"
+       "$items_file" > "$tmp_file"
+    mv "$tmp_file" "$items_file"
 }
 
 # ─────────────────────────────────────────────────────────────────────────────

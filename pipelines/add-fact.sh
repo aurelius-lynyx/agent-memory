@@ -17,6 +17,18 @@ CONTENT="$3"
 SOURCE="$4"
 SOURCE_REF="${5:-}"
 
+validate_slug() {
+    local val="$1"
+    local label="$2"
+    if [[ ! "$val" =~ ^[a-z0-9][a-z0-9_-]*$ ]]; then
+        echo "Error: $label must match ^[a-z0-9][a-z0-9_-]*$" >&2
+        echo "Got: $val" >&2
+        exit 1
+    fi
+}
+
+validate_slug "$ENTITY" "entity-slug"
+
 ENTITY_DIR="$ENTITIES_DIR/$ENTITY"
 ITEMS_FILE="$ENTITY_DIR/items.json"
 
@@ -52,7 +64,8 @@ FACT=$(jq -n \
     }')
 
 # Append to items.json
-jq --argjson fact "$FACT" '. += [$fact]' "$ITEMS_FILE" > "${ITEMS_FILE}.tmp"
-mv "${ITEMS_FILE}.tmp" "$ITEMS_FILE"
+tmp_file="$(mktemp "${ITEMS_FILE}.tmp.XXXXXX")"
+jq --argjson fact "$FACT" '. += [$fact]' "$ITEMS_FILE" > "$tmp_file"
+mv "$tmp_file" "$ITEMS_FILE"
 
 echo "Added fact $FACT_ID to $ENTITY"

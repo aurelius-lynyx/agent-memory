@@ -311,6 +311,12 @@ agent-memory/
 
 No cloud services, no API keys, no database. Just files.
 
+### Security hardening tips
+
+- Validate script inputs if values can come from untrusted sources.
+- Run with restrictive permissions (`umask 077`) and keep memory files private.
+- Prefer reviewing and pinning to a known commit when integrating into production agents.
+
 ---
 
 ## Credits
